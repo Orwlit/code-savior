@@ -1,8 +1,17 @@
+import subprocess
 import re
 from typing import List, Dict, Union
+import logging
+
+# 设置日志
+logging.basicConfig(level=logging.WARNING)
+git_logger = logging.getLogger(__name__)
 
 class GitDiffProcessor:
     def __init__(self, diff_content: str):
+        if not diff_content:
+            git_logger.error("Received empty git diff content.")
+            raise ValueError("Received empty git diff content.")
         self.diff_content = diff_content
 
     def _extract_file_metadata(self) -> List[Dict[str, Union[str, bool]]]:
@@ -30,13 +39,19 @@ class GitDiffProcessor:
                     file_data["old_index"] = indices[0]
                     file_data["new_index"] = indices[1]
                 metadata.append(file_data)
+        
+        if not metadata:
+            git_logger.warning("No file metadata found in git diff content.")
         return metadata
 
     def _interpret_change_context(self, context: str) -> str:
         match = re.match(r"@@ -(\d+,\d+) \+(\d+,\d+) @@", context)
-        if match:
-            old = match.group(1)
-            new = match.group(2)
+        if not match:
+            git_logger.error(f"Unexpected change context format: {context}")
+            raise ValueError(f"Unexpected change context format: {context}")
+        
+        old = match.group(1)
+        new = match.group(2)
         old_start, old_count = map(int, old.split(","))
         new_start, new_count = map(int, new.split(","))
 
@@ -74,6 +89,9 @@ class GitDiffProcessor:
                 "info": current_change[0],
                 "lines": current_change[1:]
             })
+
+        if not changes:
+            git_logger.warning("No changes found in git diff content.")
         return changes
 
     def process_diff(self) -> Dict[str, Union[List[Dict[str, str]], Dict[str, List[Dict[str, Union[str, List[str]]]]]]]:
@@ -122,45 +140,41 @@ class GitDiffData:
 
 
 
-import subprocess
 def get_git_diff_cached_output() -> str:
-    result = subprocess.run(['git', 'diff', '--cached'], stdout=subprocess.PIPE)
-    return result.stdout.decode('utf-8')
+    try:
+        result = subprocess.run(['git', 'diff', '--cached'], stdout=subprocess.PIPE, check=True)
+        return result.stdout.decode('utf-8')
+    except subprocess.CalledProcessError:
+        git_logger.error("Error executing git diff --cached. Are you in a git repository?")
+        raise RuntimeError("Error executing git diff --cached. Are you in a git repository?")
+    except Exception as e:
+        git_logger.error(f"Unexpected error occurred: {e}")
+        raise
+
+# # GitDiffProcessor使用示例
+# diff_content = get_git_diff_cached_output()
+# processor = GitDiffProcessor(diff_content)
+# parsed_data = processor.process_diff()
+# print(parsed_data)
 
 
-# GitDiffProcessor使用示例
-diff_content = get_git_diff_cached_output()
-processor = GitDiffProcessor(diff_content)
-parsed_data = processor.process_diff()
-print(parsed_data)
 
 
 
+# # "parsed_data"数据结构的使用示例
+# diff_data = GitDiffData(parsed_data)
 
+# # 获取所有更改的文件
+# changed_files = diff_data.get_changed_files() 
+# print(f"\n\n获取所有更改的文件\n{changed_files}\n")
 
-# "parsed_data"数据结构的使用示例
-diff_data = GitDiffData(parsed_data)
+# # 获取特定文件的所有更改
+# changes_for_file = diff_data.get_changes_for_file('code.py')
+# print(f"获取特定文件的所有更改\n{changes_for_file}\n")
 
-# 获取所有更改的文件
-changed_files = diff_data.get_changed_files() 
-print(f"\n\n获取所有更改的文件\n{changed_files}\n")
+# # 获取特定文件的特定更改
+# specific_change = diff_data.get_specific_change('code.py', 0)
+# print(f"获取特定文件的特定更改\n{specific_change}\n")
 
-# 获取特定文件的所有更改
-changes_for_file = diff_data.get_changes_for_file('code.py')
-print(f"获取特定文件的所有更改\n{changes_for_file}\n")
-
-# 获取特定文件的特定更改
-specific_change = diff_data.get_specific_change('code.py', 0)
-print(f"获取特定文件的特定更改\n{specific_change}\n")
-
-# 显示所有更改的摘要
-diff_data.display_changes()
-
-
-# 遗留问题
-# 假设我想把我写的这个文件做成pypi包发布出去，其中提取git diff --cached的函数如下。这个文件名字是git_utils.py，它一定会被我项目中其他组件调用。我在想像这样一个获得git diff的功能性函数应该放在哪里，是项目的主函数还是git_utils.py，还是另开一个单独的通用性的工具文件utils.py。而且我也不太明白这个函数有没有必要设成静态函数或其他相关修饰也好操作也罢，我不想让这个函数出错，也用最好的方式在我的工程中实现这个函数
-
-# import subprocess
-# def get_git_diff_cached_output() -> str:
-#     result = subprocess.run(['git', 'diff', '--cached'], stdout=subprocess.PIPE)
-#     return result.stdout.decode('utf-8')
+# # 显示所有更改的摘要
+# diff_data.display_changes()
