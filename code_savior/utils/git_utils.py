@@ -1,11 +1,9 @@
 import subprocess
 import re
 from typing import List, Dict, Union
-import logging
 
-# 设置日志
-logging.basicConfig(level=logging.WARNING)
-git_logger = logging.getLogger(__name__)
+from config import git_logger
+git_logger.info("This is an info message from git_utils.py.")
 
 class GitDiffProcessor:
     def __init__(self, diff_content: str):

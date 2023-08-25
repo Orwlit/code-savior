@@ -1,10 +1,8 @@
 from utils.git_utils import get_git_diff_cached_output
 from utils.git_utils import GitDiffProcessor
-import logging
 
-# 设置日志
-logging.basicConfig(level=logging.WARNING)
-git_logger = logging.getLogger(__name__)
+from config import logger
+logger.info("This is an info message from main.py.")
 
 if __name__ == "__main__":
     try:
@@ -16,11 +14,11 @@ if __name__ == "__main__":
         parsed_data = git_processor.process_diff()
 
     except ValueError as ve:
-        git_logger.error(f"Value error occurred: {ve}")
+        logger.error(f"Value error occurred: {ve}")
         print(f"Error: {ve}")
     except RuntimeError as re:
-        git_logger.error(f"Runtime error occurred: {re}")
+        logger.error(f"Runtime error occurred: {re}")
         print(f"Error: {re}")
     except Exception as e:
-        git_logger.error(f"Unexpected error occurred: {e}")
+        logger.error(f"Unexpected error occurred: {e}")
         print(f"An unexpected error occurred. Please check the logs for more details.")

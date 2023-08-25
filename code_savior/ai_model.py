@@ -1,22 +1,43 @@
 from typing import Tuple
 
+from langchain.chat_models import ChatOpenAI
+
+from config import CS_OPENAI_API_KEY, CS_OPENAI_MODEL, CS_OPENAI_BASE_PATH, CS_OPENAI_MAX_TOKEN, CS_TIMEOUT
+from config import CS_MAX_LENGTH, CS_LANGUAGE, CS_N_GENERATE, CS_RESPONSE_TYPE
+from config import CS_PROXY, CS_TIMEOUT
+
+from config import ai_logger
 
 class CommitDocAI:
-    def __init__(self, model):
-        self.model = model  # 这是一个AI模型，用于生成commit消息和文档
-        self.config = self.get_config()
-        self.translation = self.get_translation()
+    def __init__(self):
+        self.get_config()
+
+        self.llm = ChatOpenAI(
+            temperature=0,                                                                         
+            model_name=CS_OPENAI_MODEL, 
+            openai_api_key=CS_OPENAI_API_KEY,
+            openai_api_base=CS_OPENAI_BASE_PATH,
+            max_tokens=CS_OPENAI_MAX_TOKEN,
+            request_timeout=CS_TIMEOUT,
+            openai_proxy=CS_PROXY, # TODO: 不知道这样对不对，langchain说默认值为None
+        )
+        
 
     def get_config(self):
         # 获取配置，例如语言、是否使用emoji等
-        pass
+        self.commit_max_length = CS_MAX_LENGTH
+        self.commit_n_generate = CS_N_GENERATE
+        self.commit_language = CS_LANGUAGE
+        self.commit_response_type = CS_RESPONSE_TYPE
+        
 
-    def get_translation(self):
+    def get_translation(self, input:str) -> str:
         # 根据配置获取相应的翻译
-        pass
+        output = input
+        return output
 
     def generate_commit_message_chat_completion_prompt(self, diff):
-        # 生成commit消息的提示
+        # 生成commit消息的prompt
         pass
 
     def get_messages_promises_by_changes_in_file(self, file_diff, separator, max_change_length):
