@@ -1,8 +1,6 @@
 from typing import Tuple
 
 import openai
-# from langchain.chat_models import ChatOpenAI
-# from langchain.prompts import PromptTemplate
 
 from code_savior.config import CS_OPENAI_API_KEY, CS_OPENAI_MODEL, CS_OPENAI_BASE_PATH, CS_OPENAI_MAX_TOKEN, CS_TIMEOUT
 from code_savior.config import CS_MAX_LENGTH, CS_LANGUAGE, CS_N_GENERATE, CS_RESPONSE_TYPE
@@ -110,16 +108,24 @@ class CommitDocAI:
         # 延迟函数
         pass
 
-    def generate_commit_message_by_diff(self, parsed_data):
+    def generate_commit_message_by_diff(self, parsed_data) -> str:
         # 主要的函数，根据diff生成commit消息
         commit_prompt = self._generate_commit_message_prompt(parsed_data)
+        
         kwargs = {
             "model": CS_OPENAI_MODEL,
             "max_tokens": CS_OPENAI_MAX_TOKEN,
-            "prompt": commit_prompt,
             "temperature": 0,
+            "messages": [
+                {
+                    "role": "user", 
+                    "content": commit_prompt
+                }
+            ],
         }
-        response = openai.Completion.create(**kwargs)
-        print(response)
-        # print(response.choices[0].message['content'])
+        response = openai.ChatCompletion.create(**kwargs)
+        # print(f"{response}\n\n")
+        # response格式详情见：https://platform.openai.com/docs/guides/gpt/chat-completions-response-format
+        commit_message = response.choices[0].message['content']
 
+        return commit_message
