@@ -1,3 +1,5 @@
+from rich import print as rprint
+
 from code_savior.utils.git_utils import get_git_diff_cached_output
 from code_savior.utils.git_utils import GitDiffProcessor
 from code_savior.ai_model import CommitDocAI
@@ -18,11 +20,11 @@ if __name__ == "__main__":
     commit_message = llm.generate_commit_message_by_diff(parsed_data=parsed_data)
 
     interface = GitInterface()
-    commit_msg = "🐛 修复(code.py)：在除法函数中添加对除数为0的判断，避免出现除数为0的错误"
-    if interface.ask_for_confirmation(commit_msg):
-        interface.git_commit(commit_msg)
+    commit_msg = "这是我的commit描述"
+    if interface.ask_for_confirmation(commit_message):
+        interface.git_commit(commit_message)
     else:
-        print("提交已取消。")
+        rprint("[bold red]提交已取消。[/bold red]")
 
     # except ValueError as ve:
     #     logger.error(f"Value error occurred: {ve}")

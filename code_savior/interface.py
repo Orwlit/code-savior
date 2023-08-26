@@ -1,20 +1,12 @@
-from prompt_toolkit.shortcuts import radiolist_dialog
-from rich.console import Console
-from rich.panel import Panel
-from rich.text import Text
+from prompt_toolkit.shortcuts import confirm
+from rich import print as rprint
 
 class GitInterface:
 
     def __init__(self):
-        self.console = Console()
+        pass
 
-    def display_header(self):
-        self.console.print(Panel("[bold blue]open-commit[/bold blue]"))
-        self.console.print("◇  1 staged files:")
-        self.console.print("  code.py")
-        self.console.print("◇  📝 Commit message generated")
-
-    def ask_for_confirmation(self, commit_message):
+    def ask_for_confirmation(self, commit_message: str) -> bool:
         """
         Display the generated commit message and ask the user for confirmation.
 
@@ -24,18 +16,15 @@ class GitInterface:
         Returns:
         - bool: True if the user confirms, False otherwise.
         """
-        self.display_header()
-        self.console.print(Panel(Text(f"Commit message:\n——————————————————\n{commit_message}\n——————————————————", style="bold green")))
+        rprint(f"[bold blue]自动生成的提交信息:[/bold blue] {commit_message}")
+        return confirm("您同意此次提交信息吗?")
 
-        result = radiolist_dialog(
-            title="Confirm the commit message?",
-            values=[
-                ("yes", "● Yes"),
-                ("no", "○ No")
-            ]).run()
+    def git_commit(self, commit_message: str) -> None:
+        """
+        Simulate a git commit operation with the provided message.
 
-        return result == "yes"
-
-    def git_commit(self, commit_message):
-        # 这里添加git提交的逻辑
-        self.console.print(f"Committing with message: {commit_message}")
+        Args:
+        - commit_message (str): Commit message to use.
+        """
+        # 这里是模拟的git提交操作。实际上您可以调用git命令或使用其他方法进行提交。
+        rprint("[bold green]Committing with message:[/bold green]", commit_message)
