@@ -66,10 +66,10 @@ for param, value in vars(args).items():
 CS_OPENAI_API_KEY = config.get('OpenAI', 'API_KEY', fallback=None)
 CS_OPENAI_BASE_PATH = config.get('OpenAI', 'BASE_PATH', fallback="https://api.openai.com")
 CS_OPENAI_MODEL = config.get('OpenAI', 'MODEL', fallback="gpt-3.5-turbo")
-CS_OPENAI_MAX_TOKEN = config.get('OpenAI', 'MAX_TOKEN', fallback=1000)
+CS_OPENAI_MAX_TOKEN = config.getint('OpenAI', 'MAX_TOKEN', fallback=1000)
 
 CS_MAX_LENGTH = config.getint('Messages', 'MAX_LENGTH', fallback=1000)
-CS_LANGUAGE = config.get('Messages', 'LANGUAGE', fallback="en")
+CS_LANGUAGE = config.get('Messages', 'LANGUAGE', fallback="en") # ISO 639-1格式
 CS_N_GENERATE = config.getint('Messages', 'N_GENERATE', fallback=3)
 CS_RESPONSE_TYPE = config.get('Messages', 'RESPONSE_TYPE', fallback="")
 
