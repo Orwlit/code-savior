@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="code-savior",
-    version="0.1",
+    version="0.2",
     author="Yuzhe Wang (GitHub: Orwlit)",  # 添加您的名字
     author_email="orwlit31@outlook.com",  # 添加您的邮箱
     description="code-savior: An AI-powered tool to automatically generate descriptive git commit messages. Supports multiple languages and aims to provide auto-generated code documentation in the future.",  # 添加简短的描述

@@ -32,6 +32,7 @@
 import os
 import inquirer
 from rich import print
+from typing import List
 
 from code_savior.config import exclude_files
 from code_savior.utils.git_utils import git_commit
@@ -40,7 +41,7 @@ class GitInterface:
     def __init__(self):
         pass
 
-    def _confirm_commit_message(self, commit_message):
+    def _confirm_commit_message(self, commit_messages): # TODO: 能让用户选择一个信息去提交
         """
         Display the generated commit message and ask the user for confirmation.
 
@@ -53,17 +54,20 @@ class GitInterface:
 
         # 获取终端的宽度
         terminal_width = os.get_terminal_size().columns
-        # Determine the length of the longest line in the commit message
-        max_line_length = max(len(line) for line in commit_message.split('\n')) + 4  # Adding 4 for the extra spaces and quotes
+        # 找到commit_messages中所有元素最长的那一行的长度
+        max_line_length = 0
+        for message in commit_messages:
+            max_line_length = max(len(line) for line in message.split('\n')) + 4  # Adding 4 for the extra spaces and quotes
 
         # 如果max_line_length比终端的宽度还大，就使用终端的宽度
         max_line_length = min(max_line_length, terminal_width)
         
-        print(f"[cyan]{'-' * max_line_length}[/cyan]")
-        for line in commit_message.split('\n'):
-            print(f"[yellow] {line} [/yellow]")
-        print(f"[cyan]{'-' * max_line_length}[/cyan]")
-        print()
+        for message in commit_messages:
+            print(f"[cyan]{'-' * max_line_length}[/cyan]")
+            for line in message.split('\n'):
+                print(f"[yellow] {line} [/yellow]")
+            print(f"[cyan]{'-' * max_line_length}[/cyan]")
+            print()
 
         questions = [
             inquirer.List('confirmation',
@@ -75,9 +79,14 @@ class GitInterface:
         answers = inquirer.prompt(questions)
         return answers['confirmation'] == 'Yes'
     
-    def ask_and_execute(self, commit_message) -> None:
-        if self._confirm_commit_message(commit_message=commit_message):
+    def ask_and_execute(self, commit_messages:List[str]) -> None:
+
+        if self._confirm_commit_message(commit_messages=commit_messages):
             print("[green]Committing with the generated message...[/green]")
-            git_commit(commit_message=commit_message, exclude_files=exclude_files)
+            git_commit(commit_message=commit_messages[0], exclude_files=exclude_files) # TODO: 用户选择一个最好的，这里取了第一个
         else:
             print("[red]User declined the generated commit message.[/red]")
+
+    def choose_best_message(self, commit_messages:List[str]) -> str: # TODO: 能让用户选择一个信息去提交
+        pass
+    

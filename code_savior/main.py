@@ -2,11 +2,15 @@ from code_savior.utils.git_utils import get_git_diff_cached_output
 from code_savior.utils.git_utils import GitDiffProcessor
 from code_savior.ai_model import CommitDocAI
 from code_savior.interface import GitInterface
+from code_savior.config import configure_from_args
 from code_savior.config import logger
 
-
-if __name__ == "__main__":
+def main():
     # try:
+
+    # 处理命令行参数并配置参数
+    configure_from_args()
+
     # 获得"git dif --cached"的内容
     diff_content = get_git_diff_cached_output()
 
@@ -15,7 +19,7 @@ if __name__ == "__main__":
     parsed_data = git_processor.process_diff()
     
     llm = CommitDocAI()
-    commit_message = llm.generate_commit_message_by_diff(parsed_data=parsed_data)
+    commit_messages = llm.generate_commit_messages_by_diff(parsed_data=parsed_data)
 
 
     # interface = GitInterface()
@@ -27,7 +31,7 @@ if __name__ == "__main__":
     #     print("User declined the generated commit message.")
 
     interface = GitInterface()
-    interface.ask_and_execute(commit_message=commit_message)
+    interface.ask_and_execute(commit_messages=commit_messages)
 
 
     # except ValueError as ve:
@@ -42,3 +46,5 @@ if __name__ == "__main__":
 
 
 
+if __name__ == "__main__":
+    main()

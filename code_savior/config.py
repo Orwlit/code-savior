@@ -1,83 +1,83 @@
-# # OpenAI
-# CS_OPENAI_API_KEY = None
-# CS_OPENAI_BASE_PATH = None
-# CS_OPENAI_MODEL = "gpt-3.5-turbo"
-# CS_OPENAI_MAX_LENGTH = 1000  # 最长生成单词数
-
-# # Messages
-# CS_LANGUAGE = "en"
-# CS_N_GENERATE = 3  # 单次生成commit message的数量
-# CS_RESPONSE_TYPE = ""  # 生成内容满足的格式
-
-# # Network
-# CS_PROXY = None
-# CS_TIMEOUT = 10000  # 10 seconds
-
-# # Logging Configuration
-# LOGGING_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-# LOGGING_LEVEL = logging.DEBUG
-
-
-
-
-import configparser
 import argparse
 import os
 
-# 初始化配置解析器
-config = configparser.ConfigParser()
+# 设置默认值
+DEFAULT_OPENAI_API_KEY = None
+DEFAULT_OPENAI_BASE_PATH = "https://api.openai.com"
+DEFAULT_OPENAI_MODEL = "gpt-3.5-turbo"
+DEFAULT_OPENAI_MAX_TOKEN = 1000
 
-# 读取配置文件
-config_file_path = os.path.join(os.path.dirname(__file__), '..', 'config.ini')
-config.read(config_file_path)
+DEFAULT_MAX_LENGTH = 1000
+DEFAULT_LANGUAGE = "en"
+DEFAULT_N_GENERATE = 1
+DEFAULT_RESPONSE_TYPE = ""
 
-# 参数映射
-param_mapping = {
-    'api_key': ('OpenAI', 'API_KEY'),
-    'base_path': ('OpenAI', 'BASE_PATH'),
-    'model': ('OpenAI', 'MODEL'),
-    'max_length': ('OpenAI', 'MAX_LENGTH'),
-    'language': ('Messages', 'LANGUAGE'),
-    'n_generate': ('Messages', 'N_GENERATE'),
-    'response_type': ('Messages', 'RESPONSE_TYPE'),
-    'proxy': ('Network', 'PROXY'),
-    'timeout': ('Network', 'TIMEOUT')
-}
+DEFAULT_PROXY = None
+DEFAULT_TIMEOUT = 10
 
-# 使用argparse处理命令行参数
-parser = argparse.ArgumentParser(description='Configure settings for the application.')
+# 从环境变量中读取配置
+CS_OPENAI_API_KEY = os.environ.get('CS_OPENAI_API_KEY', DEFAULT_OPENAI_API_KEY)
+CS_OPENAI_BASE_PATH = os.environ.get('CS_OPENAI_BASE_PATH', DEFAULT_OPENAI_BASE_PATH)
+CS_OPENAI_MODEL = os.environ.get('CS_OPENAI_MODEL', DEFAULT_OPENAI_MODEL)
+CS_OPENAI_MAX_TOKEN = int(os.environ.get('CS_OPENAI_MAX_TOKEN', DEFAULT_OPENAI_MAX_TOKEN))
 
-# 定义所有的命令行参数
-for param in param_mapping.keys():
-    parser.add_argument(f'--{param.replace("_", "-")}', type=str, help=f'Set {param.replace("_", " ")}.')
+CS_MAX_LENGTH = int(os.environ.get('CS_MAX_LENGTH', DEFAULT_MAX_LENGTH))
+CS_LANGUAGE = os.environ.get('CS_LANGUAGE', DEFAULT_LANGUAGE)
+CS_N_GENERATE = int(os.environ.get('CS_N_GENERATE', DEFAULT_N_GENERATE))
+CS_RESPONSE_TYPE = os.environ.get('CS_RESPONSE_TYPE', DEFAULT_RESPONSE_TYPE)
 
-args = parser.parse_args()
-
-# 遍历所有的参数，检查哪些参数被设置了，并更新相应的配置
-for param, value in vars(args).items():
-    if value:
-        section, key = param_mapping[param]
-        config.set(section, key, value)
-        # 保存更新到config.ini
-        with open(config_file_path, 'w') as configfile:
-            config.write(configfile)
-
-# 从config.ini获取配置
-CS_OPENAI_API_KEY = config.get('OpenAI', 'API_KEY', fallback=None)
-CS_OPENAI_BASE_PATH = config.get('OpenAI', 'BASE_PATH', fallback="https://api.openai.com")
-CS_OPENAI_MODEL = config.get('OpenAI', 'MODEL', fallback="gpt-3.5-turbo")
-CS_OPENAI_MAX_TOKEN = config.getint('OpenAI', 'MAX_TOKEN', fallback=1000)
-
-CS_MAX_LENGTH = config.getint('Messages', 'MAX_LENGTH', fallback=1000)
-CS_LANGUAGE = config.get('Messages', 'LANGUAGE', fallback="en") # ISO 639-1格式
-CS_N_GENERATE = config.getint('Messages', 'N_GENERATE', fallback=3)
-CS_RESPONSE_TYPE = config.get('Messages', 'RESPONSE_TYPE', fallback="")
-
-CS_PROXY = config.get('Network', 'PROXY', fallback=None)
-CS_TIMEOUT = config.getint('Network', 'TIMEOUT', fallback=10) # 10 seconds
+CS_PROXY = os.environ.get('CS_PROXY', DEFAULT_PROXY)
+CS_TIMEOUT = int(os.environ.get('CS_TIMEOUT', DEFAULT_TIMEOUT))
 
 exclude_files = [] # 不添加到git暂存区的文件
 
+# 参数映射
+param_mapping = {
+    'api_key'       : 'CS_OPENAI_API_KEY',
+    'base_path'     : 'CS_OPENAI_BASE_PATH',
+    'model'         : 'CS_OPENAI_MODEL',
+    'max_token'     : 'CS_OPENAI_MAX_TOKEN',
+    'max_length'    : 'CS_MAX_LENGTH',
+    'language'      : 'CS_LANGUAGE',
+    'n_generate'    : 'CS_N_GENERATE',
+    'response_type' : 'CS_RESPONSE_TYPE',
+    'proxy'         : 'CS_PROXY',
+    'timeout'       : 'CS_TIMEOUT',
+}
+
+def configure_from_args():
+    parser = argparse.ArgumentParser(description='Configure settings for the code-savior package.')
+    parser.add_argument('--api-key', type=str, help='Set the OpenAI API key.')
+    parser.add_argument('--base-path', type=str, help='Set the OpenAI base path.')
+    parser.add_argument('--model', type=str, help='Set the OpenAI model.')
+    parser.add_argument('--max-token', type=int, help='Set the maximum token limit for OpenAI.')
+    parser.add_argument('--max-length', type=int, help='Set the maximum message length.')
+    parser.add_argument('--language', type=str, help='Set the language (ISO 639-1 format).')
+    parser.add_argument('--n-generate', type=int, help='Set the number of messages to generate.')
+    parser.add_argument('--response-type', type=str, help='Set the response type.')
+    parser.add_argument('--proxy', type=str, help='Set the network proxy.')
+    parser.add_argument('--timeout', type=int, help='Set the network timeout in seconds.')
+
+    args = parser.parse_args()
+
+    for param, value in vars(args).items():
+        if value is not None:
+            globals()[param_mapping[param]] = value
+
+
+def get_config_values():
+    return {
+        'CS_OPENAI_API_KEY': CS_OPENAI_API_KEY,
+        'CS_OPENAI_BASE_PATH': CS_OPENAI_BASE_PATH,
+        'CS_OPENAI_MODEL': CS_OPENAI_MODEL,
+        'CS_OPENAI_MAX_TOKEN': CS_OPENAI_MAX_TOKEN,
+        'CS_MAX_LENGTH': CS_MAX_LENGTH,
+        'CS_LANGUAGE': CS_LANGUAGE,
+        'CS_N_GENERATE': CS_N_GENERATE,
+        'CS_RESPONSE_TYPE': CS_RESPONSE_TYPE,
+        'CS_PROXY': CS_PROXY,
+        'CS_TIMEOUT': CS_TIMEOUT,
+    }
 
 import logging
 

@@ -1,35 +1,25 @@
-from typing import Tuple
+from typing import Tuple, List
 
 import openai
 
-from code_savior.config import CS_OPENAI_API_KEY, CS_OPENAI_MODEL, CS_OPENAI_BASE_PATH, CS_OPENAI_MAX_TOKEN, CS_TIMEOUT
-from code_savior.config import CS_MAX_LENGTH, CS_LANGUAGE, CS_N_GENERATE, CS_RESPONSE_TYPE
-from code_savior.config import CS_PROXY, CS_TIMEOUT
+from code_savior.config import get_config_values
 
 from code_savior.config import ai_logger
 
 class CommitDocAI:
     def __init__(self):
+        self.config_values = get_config_values()
         self.get_config()
 
-        openai.api_key = CS_OPENAI_API_KEY
-        # self.llm = ChatOpenAI(
-        #     temperature=0,                                                                         
-        #     model_name=CS_OPENAI_MODEL, 
-        #     openai_api_key=CS_OPENAI_API_KEY,
-        #     openai_api_base=CS_OPENAI_BASE_PATH,
-        #     max_tokens=CS_OPENAI_MAX_TOKEN,
-        #     request_timeout=CS_TIMEOUT,
-        #     openai_proxy=CS_PROXY, # TODO: 不知道这样对不对，langchain说默认值为None
-        # )
-        
+        openai.api_key = self.config_values['CS_OPENAI_API_KEY']
+       
 
     def get_config(self):
         # 获取配置，例如语言、是否使用emoji等
-        self.commit_max_length = CS_MAX_LENGTH
-        self.commit_n_generate = CS_N_GENERATE
-        self.commit_language = CS_LANGUAGE
-        self.commit_response_type = CS_RESPONSE_TYPE
+        self.commit_max_length = self.config_values['CS_MAX_LENGTH']
+        self.commit_n_generate = self.config_values['CS_N_GENERATE']
+        self.commit_language = self.config_values['CS_LANGUAGE']
+        self.commit_response_type = self.config_values['CS_RESPONSE_TYPE']
 
         self.language_mapping = {
             "en": "English",
@@ -108,13 +98,13 @@ class CommitDocAI:
         # 延迟函数
         pass
 
-    def generate_commit_message_by_diff(self, parsed_data) -> str:
+    def generate_commit_messages_by_diff(self, parsed_data) -> List[str]:
         # 主要的函数，根据diff生成commit消息
         commit_prompt = self._generate_commit_message_prompt(parsed_data)
         
         kwargs = {
-            "model": CS_OPENAI_MODEL,
-            "max_tokens": CS_OPENAI_MAX_TOKEN,
+            "model": self.config_values['CS_OPENAI_MODEL'],
+            "max_tokens": self.config_values['CS_OPENAI_MAX_TOKEN'],
             "temperature": 0,
             "messages": [
                 {
@@ -123,9 +113,14 @@ class CommitDocAI:
                 }
             ],
         }
-        response = openai.ChatCompletion.create(**kwargs)
-        # print(f"{response}\n\n")
-        # response格式详情见：https://platform.openai.com/docs/guides/gpt/chat-completions-response-format
-        commit_message = response.choices[0].message['content']
 
-        return commit_message
+        commit_messages = []
+
+        for _ in range(self.config_values['CS_N_GENERATE']):
+            response = openai.ChatCompletion.create(**kwargs)
+            # print(f"{response}\n\n")
+            # response格式详情见：https://platform.openai.com/docs/guides/gpt/chat-completions-response-format
+            message = response.choices[0].message['content']
+            commit_messages.append(message)
+
+        return commit_messages
