@@ -141,10 +141,14 @@ class GitDiffData:
 
 
 
-def get_git_diff_cached_output() -> str:
+def get_git_diff_cached_output(exclude_files:List[str]=[]) -> str:
     try:
         # # 添加所有更改的文件
         # subprocess.run(["git", "add", "."], check=True)
+
+        # 从缓存区移除不想添加的文件
+        for file in exclude_files:
+            subprocess.run(["git", "reset", file], check=True)
 
         result = subprocess.run(['git', 'diff', '--cached'], stdout=subprocess.PIPE, check=True)
         return result.stdout.decode('utf-8')
@@ -155,14 +159,7 @@ def get_git_diff_cached_output() -> str:
         git_logger.error(f"Unexpected error occurred: {e}")
         raise
 
-def git_commit(commit_message:str, exclude_files:List[str]=[]) -> None:
-    # # 添加所有更改的文件
-    # subprocess.run(["git", "add", "."], check=True)
-    
-    # 从缓存区移除不想添加的文件
-    for file in exclude_files:
-        subprocess.run(["git", "reset", file], check=True)
-    
+def git_commit(commit_message:str) -> None:
     # 提交更改
     subprocess.run(["git", "commit", "-m", commit_message], check=True)
 

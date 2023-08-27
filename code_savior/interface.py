@@ -41,52 +41,47 @@ class GitInterface:
     def __init__(self):
         pass
 
-    def _confirm_commit_message(self, commit_messages): # TODO: 能让用户选择一个信息去提交
+    def choose_and_confirm_message(self, commit_messages: List[str]) -> str:
         """
-        Display the generated commit message and ask the user for confirmation.
+        Let the user choose the best commit message from the list and confirm the choice.
 
         Args:
-        - commit_message (str): The generated commit message.
+        - commit_messages (List[str]): List of generated commit messages.
 
         Returns:
-        - bool: True if the user confirms, False otherwise.
+        - str: The commit message chosen by the user or None if the user chooses "No".
         """
-
-        # 获取终端的宽度
-        terminal_width = os.get_terminal_size().columns
-        # 找到commit_messages中所有元素最长的那一行的长度
-        max_line_length = 0
-        for message in commit_messages:
-            max_line_length = max(len(line) for line in message.split('\n')) + 4  # Adding 4 for the extra spaces and quotes
-
-        # 如果max_line_length比终端的宽度还大，就使用终端的宽度
-        max_line_length = min(max_line_length, terminal_width)
-        
-        for message in commit_messages:
-            print(f"[cyan]{'-' * max_line_length}[/cyan]")
-            for line in message.split('\n'):
-                print(f"[yellow] {line} [/yellow]")
-            print(f"[cyan]{'-' * max_line_length}[/cyan]")
-            print()
+        # 添加"No"选项到commit_messages列表的末尾
+        options = commit_messages + ["No, I don't want to commit with these messages."]
 
         questions = [
-            inquirer.List('confirmation',
-                          message="Do you agree with this commit message?",
-                          choices=['Yes', 'No'],
-                          ),
+            inquirer.List('chosen_message',
+                        message="Please choose the best commit message or decline the commit:",
+                        choices=options,
+                        ),
         ]
 
         answers = inquirer.prompt(questions)
-        return answers['confirmation'] == 'Yes'
-    
-    def ask_and_execute(self, commit_messages:List[str]) -> None:
+        chosen_message = answers['chosen_message']
 
-        if self._confirm_commit_message(commit_messages=commit_messages):
-            print("[green]Committing with the generated message...[/green]")
-            git_commit(commit_message=commit_messages[0], exclude_files=exclude_files) # TODO: 用户选择一个最好的，这里取了第一个
+        # 如果用户选择"No"，则返回None
+        if chosen_message == "No, I don't want to commit with these messages.":
+            return None
+
+        return chosen_message
+
+    def ask_and_execute(self, commit_messages: List[str]) -> None:
+        """
+        Display the generated commit messages, let the user choose the best one, and execute the commit.
+
+        Args:
+        - commit_messages (List[str]): List of generated commit messages.
+        """
+        chosen_message = self.choose_and_confirm_message(commit_messages)
+
+        if chosen_message:
+            print("[green]Committing with the chosen message...[/green]")
+            git_commit(commit_message=chosen_message, exclude_files=exclude_files)
         else:
-            print("[red]User declined the generated commit message.[/red]")
-
-    def choose_best_message(self, commit_messages:List[str]) -> str: # TODO: 能让用户选择一个信息去提交
-        pass
+            print("[red]User declined the generated commit messages.[/red]")
     
