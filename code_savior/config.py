@@ -76,6 +76,7 @@ CS_RESPONSE_TYPE = config.get('Messages', 'RESPONSE_TYPE', fallback="")
 CS_PROXY = config.get('Network', 'PROXY', fallback=None)
 CS_TIMEOUT = config.getint('Network', 'TIMEOUT', fallback=10) # 10 seconds
 
+exclude_files = [] # 不添加到git暂存区的文件
 
 
 import logging

@@ -19,12 +19,18 @@ if __name__ == "__main__":
     llm = CommitDocAI()
     commit_message = llm.generate_commit_message_by_diff(parsed_data=parsed_data)
 
+
+    # interface = GitInterface()
+    # commit_msg = "Update the README.md with new installation instructions"
+    # if interface.confirm_commit_message(commit_message):
+    #     print("Committing with the generated message...")
+    #     # Add your git commit logic here
+    # else:
+    #     print("User declined the generated commit message.")
+
     interface = GitInterface()
-    commit_msg = "这是我的commit描述"
-    if interface.ask_for_confirmation(commit_message):
-        interface.git_commit(commit_message)
-    else:
-        rprint("[bold red]提交已取消。[/bold red]")
+    interface.ask_and_execute(commit_message=commit_message)
+
 
     # except ValueError as ve:
     #     logger.error(f"Value error occurred: {ve}")
