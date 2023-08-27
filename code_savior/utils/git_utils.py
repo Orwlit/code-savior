@@ -143,9 +143,9 @@ class GitDiffData:
 
 def get_git_diff_cached_output() -> str:
     try:
-        # 添加所有更改的文件
-        subprocess.run(["git", "add", "."], check=True)
-        
+        # # 添加所有更改的文件
+        # subprocess.run(["git", "add", "."], check=True)
+
         result = subprocess.run(['git', 'diff', '--cached'], stdout=subprocess.PIPE, check=True)
         return result.stdout.decode('utf-8')
     except subprocess.CalledProcessError:

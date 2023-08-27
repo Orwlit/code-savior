@@ -1,5 +1,3 @@
-from rich import print as rprint
-
 from code_savior.utils.git_utils import get_git_diff_cached_output
 from code_savior.utils.git_utils import GitDiffProcessor
 from code_savior.ai_model import CommitDocAI
