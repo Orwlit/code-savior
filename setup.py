@@ -5,13 +5,13 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="code-savior",
-    version="0.3",
+    version="1.0",
     author="Yuzhe Wang (GitHub: Orwlit)",  # 添加您的名字
     author_email="orwlit31@outlook.com",  # 添加您的邮箱
-    description="good to load all param from .env and console args",  # 添加简短的描述
+    description="good to generate a brief commit",  # 添加简短的描述
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/your_username/code-savior",  # 添加项目的 GitHub 链接或其他项目主页链接
+    url="https://github.com/Orwlit/code-savior",  # 添加项目的 GitHub 链接或其他项目主页链接
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -21,7 +21,6 @@ setup(
     install_requires=[
         "inquirer",
         "rich",
-        "configparser",
         "argparse",
         "openai",
         "python-dotenv",
