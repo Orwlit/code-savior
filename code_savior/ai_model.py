@@ -17,7 +17,7 @@ class CommitDocAI:
     def get_config(self):
         # 获取配置，例如语言、是否使用emoji等
         self.commit_max_length = self.config_values['CS_MAX_LENGTH']
-        self.commit_n_generate = self.config_values['CS_N_GENERATE']
+        self.commit_n_generate = self.config_values['CS_MAX_ITERATION']
         self.commit_language = self.config_values['CS_LANGUAGE']
         self.commit_response_type = self.config_values['CS_RESPONSE_TYPE']
 
@@ -116,7 +116,7 @@ class CommitDocAI:
 
         commit_messages = []
 
-        for _ in range(self.config_values['CS_N_GENERATE']):
+        for _ in range(self.config_values['CS_MAX_ITERATION']):
             response = openai.ChatCompletion.create(**kwargs)
             # print(f"{response}\n\n")
             # response格式详情见：https://platform.openai.com/docs/guides/gpt/chat-completions-response-format

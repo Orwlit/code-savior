@@ -1,5 +1,8 @@
 import argparse
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # 设置默认值
 DEFAULT_OPENAI_API_KEY = None
@@ -23,13 +26,15 @@ CS_OPENAI_MAX_TOKEN = int(os.environ.get('CS_OPENAI_MAX_TOKEN', DEFAULT_OPENAI_M
 
 CS_MAX_LENGTH = int(os.environ.get('CS_MAX_LENGTH', DEFAULT_MAX_LENGTH))
 CS_LANGUAGE = os.environ.get('CS_LANGUAGE', DEFAULT_LANGUAGE)
-CS_N_GENERATE = int(os.environ.get('CS_N_GENERATE', DEFAULT_N_GENERATE))
+CS_MAX_ITERATION = int(os.environ.get('CS_MAX_ITERATION', DEFAULT_N_GENERATE))
 CS_RESPONSE_TYPE = os.environ.get('CS_RESPONSE_TYPE', DEFAULT_RESPONSE_TYPE)
 
 CS_PROXY = os.environ.get('CS_PROXY', DEFAULT_PROXY)
 CS_TIMEOUT = int(os.environ.get('CS_TIMEOUT', DEFAULT_TIMEOUT))
 
-exclude_files = [] # 不添加到git暂存区的文件
+exclude_files_str = os.environ.get('EXCLUDE_FILES', '')
+EXCLUDE_FILES = exclude_files_str.split(',') if exclude_files_str else []
+
 
 # 参数映射
 param_mapping = {
@@ -39,30 +44,35 @@ param_mapping = {
     'max_token'     : 'CS_OPENAI_MAX_TOKEN',
     'max_length'    : 'CS_MAX_LENGTH',
     'language'      : 'CS_LANGUAGE',
-    'n_generate'    : 'CS_N_GENERATE',
+    'max_iteration'    : 'CS_MAX_ITERATION',
     'response_type' : 'CS_RESPONSE_TYPE',
     'proxy'         : 'CS_PROXY',
     'timeout'       : 'CS_TIMEOUT',
+    'exclude_files' : 'EXCLUDE_FILES',
 }
 
 def configure_from_args():
     parser = argparse.ArgumentParser(description='Configure settings for the code-savior package.')
-    parser.add_argument('--api-key', type=str, help='Set the OpenAI API key.')
-    parser.add_argument('--base-path', type=str, help='Set the OpenAI base path.')
+    parser.add_argument('--api_key', type=str, help='Set the OpenAI API key.')
+    parser.add_argument('--base_path', type=str, help='Set the OpenAI base path.')
     parser.add_argument('--model', type=str, help='Set the OpenAI model.')
-    parser.add_argument('--max-token', type=int, help='Set the maximum token limit for OpenAI.')
-    parser.add_argument('--max-length', type=int, help='Set the maximum message length.')
+    parser.add_argument('--max_token', type=int, help='Set the maximum token limit for OpenAI.')
+    parser.add_argument('--max_length', type=int, help='Set the maximum message length.')
     parser.add_argument('--language', type=str, help='Set the language (ISO 639-1 format).')
-    parser.add_argument('--n-generate', type=int, help='Set the number of messages to generate.')
-    parser.add_argument('--response-type', type=str, help='Set the response type.')
+    parser.add_argument('--max_iteration', type=int, help='Set the number of messages to generate.')
+    parser.add_argument('--response_type', type=str, help='Set the response type.')
     parser.add_argument('--proxy', type=str, help='Set the network proxy.')
     parser.add_argument('--timeout', type=int, help='Set the network timeout in seconds.')
+    parser.add_argument('--exclude_files', nargs='+', help='List of files to exclude.')
 
     args = parser.parse_args()
 
     for param, value in vars(args).items():
         if value is not None:
-            globals()[param_mapping[param]] = value
+            if param == 'exclude_files':
+                EXCLUDE_FILES.extend(value)
+            else:
+                globals()[param_mapping[param]] = value
 
 
 def get_config_values():
@@ -73,7 +83,7 @@ def get_config_values():
         'CS_OPENAI_MAX_TOKEN': CS_OPENAI_MAX_TOKEN,
         'CS_MAX_LENGTH': CS_MAX_LENGTH,
         'CS_LANGUAGE': CS_LANGUAGE,
-        'CS_N_GENERATE': CS_N_GENERATE,
+        'CS_MAX_ITERATION': CS_MAX_ITERATION,
         'CS_RESPONSE_TYPE': CS_RESPONSE_TYPE,
         'CS_PROXY': CS_PROXY,
         'CS_TIMEOUT': CS_TIMEOUT,

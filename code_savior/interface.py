@@ -34,7 +34,6 @@ import inquirer
 from rich import print
 from typing import List
 
-from code_savior.config import exclude_files
 from code_savior.utils.git_utils import git_commit
 
 class GitInterface:
@@ -81,7 +80,7 @@ class GitInterface:
 
         if chosen_message:
             print("[green]Committing with the chosen message...[/green]")
-            git_commit(commit_message=chosen_message, exclude_files=exclude_files)
+            git_commit(commit_message=chosen_message)
         else:
             print("[red]User declined the generated commit messages.[/red]")
     
