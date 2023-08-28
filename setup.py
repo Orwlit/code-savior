@@ -5,10 +5,10 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="code-savior",
-    version="0.2",
+    version="0.3",
     author="Yuzhe Wang (GitHub: Orwlit)",  # 添加您的名字
     author_email="orwlit31@outlook.com",  # 添加您的邮箱
-    description="code-savior: An AI-powered tool to automatically generate descriptive git commit messages. Supports multiple languages and aims to provide auto-generated code documentation in the future.",  # 添加简短的描述
+    description="good to load all param from .env and console args",  # 添加简短的描述
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/your_username/code-savior",  # 添加项目的 GitHub 链接或其他项目主页链接
@@ -23,7 +23,8 @@ setup(
         "rich",
         "configparser",
         "argparse",
-        "openai"
+        "openai",
+        "python-dotenv",
     ],
     entry_points={
         'console_scripts': [
