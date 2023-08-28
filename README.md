@@ -2,6 +2,12 @@
 
 [English](#english-version) | [中文](#中文版本)
 
+## TODO
+- [ ] 支持[Conventional](https://www.conventionalcommits.org/en/v1.0.0/)或[Angular](https://github.com/angular/angular/)的标准commit格式
+- [ ] 换一个好看点的界面
+- [ ] 代码审查功能
+- [ ] 自动输出代码文档功能
+
 ---
 
 ## English Version
