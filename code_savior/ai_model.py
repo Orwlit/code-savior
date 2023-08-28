@@ -1,9 +1,8 @@
-from typing import Tuple, List
+from typing import List
 
 import openai
 
 from code_savior.config import get_config_values
-
 from code_savior.config import ai_logger
 
 class CommitDocAI:
@@ -41,11 +40,6 @@ class CommitDocAI:
         }
         
 
-    def get_translation(self, input:str) -> str:
-        # 根据配置获取相应的翻译
-        output = input
-        return output
-
     def _generate_commit_message_prompt(self, parsed_data) -> str:
         # 用特定语言回答
         language = self.language_mapping.get(self.commit_language, "Unknown Language")
@@ -60,17 +54,14 @@ class CommitDocAI:
             new_index = file_data["new_index"]
             file_mode = file_data["file_mode"]
             
+
+
             if old_path != new_path:
-                file_changes += f"For the file '{old_path}', index changed from {old_index} to {new_index}:\n"
-            else:
-                file_changes += f"For the file '{old_path}' (index {old_index}) changed to '{new_path}' (index {new_index}):\n"
-            
-            if is_new:
-                file_changes += "This is a new file.\n"
+                file_changes += f"The file path changed from '{old_path}' to '{new_path}'.\n"
+            elif is_new:
+                file_changes += f"A new file '{new_path}' was added.\n"
             elif is_deleted:
-                file_changes += "This file was deleted.\n"
-            if file_mode:
-                file_changes += f"File mode: {file_mode}\n"
+                file_changes += f"The file '{old_path}' was deleted.\n"
             
             changes = parsed_data["changes"].get(new_path, [])
             for change in changes:
@@ -82,16 +73,8 @@ class CommitDocAI:
         prompt_template = f"In {language}, please summarize the following changes:\n{file_changes}"
         return prompt_template
 
-    def get_messages_promises_by_changes_in_file(self, file_diff, separator, max_change_length):
-        # 根据文件的变化获取消息
-        pass
-
     def split_diff(self, diff, max_change_length):
         # 拆分diff以适应最大长度
-        pass
-
-    def get_commit_msgs_promises_from_file_diffs(self, diff, max_diff_length):
-        # 从文件的diffs中获取commit消息
         pass
 
     def delay(self, ms):

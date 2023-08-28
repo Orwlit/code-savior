@@ -32,8 +32,8 @@ CS_RESPONSE_TYPE = os.environ.get('CS_RESPONSE_TYPE', DEFAULT_RESPONSE_TYPE)
 CS_PROXY = os.environ.get('CS_PROXY', DEFAULT_PROXY)
 CS_TIMEOUT = int(os.environ.get('CS_TIMEOUT', DEFAULT_TIMEOUT))
 
-exclude_files_str = os.environ.get('EXCLUDE_FILES', '')
-EXCLUDE_FILES = exclude_files_str.split(',') if exclude_files_str else []
+exclude_files_str = os.environ.get('CS_EXCLUDE_FILES', '')
+CS_EXCLUDE_FILES = exclude_files_str.split(',') if exclude_files_str else []
 
 
 # 参数映射
@@ -48,7 +48,7 @@ param_mapping = {
     'response_type' : 'CS_RESPONSE_TYPE',
     'proxy'         : 'CS_PROXY',
     'timeout'       : 'CS_TIMEOUT',
-    'exclude_files' : 'EXCLUDE_FILES',
+    'exclude_files' : 'CS_EXCLUDE_FILES',
 }
 
 def configure_from_args():
@@ -70,7 +70,7 @@ def configure_from_args():
     for param, value in vars(args).items():
         if value is not None:
             if param == 'exclude_files':
-                EXCLUDE_FILES.extend(value)
+                CS_EXCLUDE_FILES.extend(value)
             else:
                 globals()[param_mapping[param]] = value
 
