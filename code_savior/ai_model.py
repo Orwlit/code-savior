@@ -42,60 +42,50 @@ class CommitDocAI:
         
 
     def _generate_commit_message_prompt(self, parsed_data) -> str:
-        prompt_template = "The following content lists some files that are about to undergo a git commit and the corresponding modifications within these files:\n"
+        # Initial prompt setup
+        prompt_template = "You are to act as the author of a commit message in git. Here are the changes:\n"
 
-        # 用特定语言回答
+        # Use specific language for the answer
         language = self.language_mapping.get(self.commit_language, "Unknown Language")
-        
-        # file_changes = ""
+
+        # Iterate through file metadata to generate the file changes description
         for file_data in parsed_data["file_metadata"]:
             old_path = file_data["old_path"]
             new_path = file_data["new_path"]
             is_new = file_data["is_new_file"]
             is_deleted = file_data["is_deleted_file"]
-            # old_index = file_data["old_index"]
-            # new_index = file_data["new_index"]
-            # file_mode = file_data["file_mode"]
-            
 
-
+            # Describe the type of change for each file
             if old_path != new_path:
-                prompt_template += f"In file: '{new_path}' (changed from '{old_path}'), the specific modifications are as follows:\n"
+                prompt_template += f"In file: '{new_path}' (changed from '{old_path}'), the modifications are:\n"
             elif is_new:
-                prompt_template += f"In file: '{new_path}' (new file), the specific modifications are as follows:\n"
+                prompt_template += f"In file: '{new_path}' (new file), the modifications are:\n"
             elif is_deleted:
                 prompt_template += f"In file: '{old_path}' (deleted)\n"
                 continue
             else:
-                prompt_template += f"In file: '{new_path}' (modified), the specific modifications are as follows:\n"
+                prompt_template += f"In file: '{new_path}', the modifications are:\n"
 
-            changes = parsed_data["changes"].get(new_path, []) # changes: 当前文件的所有更改
-            n_changes = len(changes)
-            prompt_template += f"There are {n_changes} changes in total.\n"
-            
-            for i in range(n_changes):
-                prompt_template += f"Change context number {i+1}:\n"
-                for line in changes[i]['lines']:
+            # Describe the specific changes in each file
+            changes = parsed_data["changes"].get(new_path, [])
+            for i, change in enumerate(changes):
+                prompt_template += f"Change {i+1}:\n"
+                for line in change['lines']:
                     prompt_template += f"{line}\n"
                 prompt_template += "\n"
 
-        prompt_summarize = f"These files are all to be committed in this 'git commit'. Next, please answer in {language} and complete the following tasks:\n"
-        prompt_summarize += "1. Speculate the purpose of this commit, such as what features were implemented, which codes were optimized, etc. If you analyze that these code modifications have multiple purposes, please explain these purposes separately.\n"
-        prompt_summarize += "2. Summarize the modification content of each file and explain how these modifications serve the purpose of this commit.\n"
-        prompt_summarize += "\n"
+        # Instructions for the model
+        prompt_instructions = f"Based on the above changes, please answer in {language} and generate a git commit message. Summarize the purpose and main modifications concisely. For example: 'improve the clarity of the prompt, removes commented out code'.\n"
 
-        prompt_answer_format =  "You will answer in the tone of the code's author and generate a git commit message within {self.commit_max_length} words.\n"
-        prompt_answer_format += "You will answer the above questions in the following format:\n"
-        prompt_answer_format += "Brief: [You will answer the purpose of this commit here]\n"
-        prompt_answer_format += "File modifications:\n"
-        prompt_answer_format += "- [File name]: [You will answer the modification content of each file in sequence here and explain how these modifications serve the purpose of this commit]\n"
-        prompt_answer_format += "\n"
+        # Format for the answer
+        prompt_format = "Answer format (markdown format):\n"
+        prompt_format += "Brief: [Summarize the purpose and main modifications]\n"
+        prompt_format += "File modifications:\n"
+        prompt_format += "- [File name]: [Briefly describe the modifications and their purpose]\n"
 
-        prompt_end = "Your answer:"
-
-        prompt_template += prompt_summarize
-        prompt_template += prompt_answer_format
-        prompt_template += prompt_end
+        # Combine all parts of the prompt
+        prompt_template += prompt_instructions
+        prompt_template += prompt_format
 
         return prompt_template
 

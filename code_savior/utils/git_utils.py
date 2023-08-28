@@ -109,35 +109,35 @@ class GitDiffProcessor:
         return result
 
 
-# 用来快速使用parsed_data所构建的类
-class GitDiffData:
-    def __init__(self, data: Dict[str, object]):
-        self.data = data
+# # 用来快速使用parsed_data所构建的类
+# class GitDiffData:
+#     def __init__(self, data: Dict[str, object]):
+#         self.data = data
 
-    def get_changed_files(self) -> List[str]:
-        """返回所有更改的文件路径"""
-        return list(self.data['changes'].keys())
+#     def get_changed_files(self) -> List[str]:
+#         """返回所有更改的文件路径"""
+#         return list(self.data['changes'].keys())
 
-    def get_changes_for_file(self, file_path: str) -> List[Dict[str, List[str]]]:
-        """返回指定文件的所有更改"""
-        return self.data['changes'].get(file_path, [])
+#     def get_changes_for_file(self, file_path: str) -> List[Dict[str, List[str]]]:
+#         """返回指定文件的所有更改"""
+#         return self.data['changes'].get(file_path, [])
 
-    def get_specific_change(self, file_path: str, index: int) -> Dict[str, List[str]]:
-        """返回指定文件的特定更改"""
-        changes = self.get_changes_for_file(file_path)
-        if 0 <= index < len(changes):
-            return changes[index]
-        return {}
+#     def get_specific_change(self, file_path: str, index: int) -> Dict[str, List[str]]:
+#         """返回指定文件的特定更改"""
+#         changes = self.get_changes_for_file(file_path)
+#         if 0 <= index < len(changes):
+#             return changes[index]
+#         return {}
 
-    def display_changes(self):
-        """显示所有更改的摘要"""
-        for file in self.get_changed_files():
-            print(f"Changes for {file}:")
-            for change in self.get_changes_for_file(file):
-                print(change['info'])
-                for line in change['lines']:
-                    print(line)
-            print("\n")
+#     def display_changes(self):
+#         """显示所有更改的摘要"""
+#         for file in self.get_changed_files():
+#             print(f"Changes for {file}:")
+#             for change in self.get_changes_for_file(file):
+#                 print(change['info'])
+#                 for line in change['lines']:
+#                     print(line)
+#             print("\n")
 
 
 
@@ -162,62 +162,3 @@ def get_git_diff_cached_output(exclude_files:List[str]=[]) -> str:
 def git_commit(commit_message:str) -> None:
     # 提交更改
     subprocess.run(["git", "commit", "-m", commit_message], check=True)
-
-
-
-# # GitDiffProcessor使用示例
-# diff_content = get_git_diff_cached_output()
-# processor = GitDiffProcessor(diff_content)
-# parsed_data = processor.process_diff()
-# print(parsed_data)
-
-# language = "Chinese"
-# file_changes = ""
-# for file_data in parsed_data["file_metadata"]:
-#     old_path = file_data["old_path"]
-#     new_path = file_data["new_path"]
-#     is_new = file_data["is_new_file"]
-#     is_deleted = file_data["is_deleted_file"]
-#     old_index = file_data["old_index"]
-#     new_index = file_data["new_index"]
-#     file_mode = file_data["file_mode"]
-    
-#     if old_path != new_path:
-#         file_changes += f"For the file '{old_path}', index changed from {old_index} to {new_index}:\n"
-#     else:
-#         file_changes += f"For the file '{old_path}' (index {old_index}) changed to '{new_path}' (index {new_index}):\n"
-    
-#     if is_new:
-#         file_changes += "This is a new file.\n"
-#     elif is_deleted:
-#         file_changes += "This file was deleted.\n"
-#     if file_mode:
-#         file_changes += f"File mode: {file_mode}\n"
-    
-#     changes = parsed_data["changes"].get(new_path, [])
-#     for change in changes:
-#         file_changes += f"Change context: {change['info']}\n"
-#         for line in change['lines']:
-#             file_changes += f"{line}\n"
-#         file_changes += "\n"
-
-# prompt = f"In {language}, please summarize the following changes:\n{file_changes}"
-# print(prompt)
-
-# # "parsed_data"数据结构的使用示例
-# diff_data = GitDiffData(parsed_data)
-
-# # 获取所有更改的文件
-# changed_files = diff_data.get_changed_files() 
-# print(f"\n\n获取所有更改的文件\n{changed_files}\n")
-
-# # 获取特定文件的所有更改
-# changes_for_file = diff_data.get_changes_for_file('code.py')
-# print(f"获取特定文件的所有更改\n{changes_for_file}\n")
-
-# # 获取特定文件的特定更改
-# specific_change = diff_data.get_specific_change('code.py', 0)
-# print(f"获取特定文件的特定更改\n{specific_change}\n")
-
-# # 显示所有更改的摘要
-# diff_data.display_changes()
