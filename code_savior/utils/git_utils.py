@@ -43,7 +43,7 @@ class GitDiffProcessor:
             git_logger.warning("No file metadata found in git diff content.")
         return metadata
 
-    def _interpret_change_context(self, context: str) -> str:
+    def _interpret_change_context(self, context: str) -> dict:
         match = re.match(r"@@ -(?:(\d+),)?(\d+) \+(?:(\d+),)?(\d+) @@", context)
         if not match:
             git_logger.error(f"Unexpected change context format: {context}")
@@ -54,15 +54,33 @@ class GitDiffProcessor:
         new_start = int(match.group(3)) if match.group(3) else 1
         new_count = int(match.group(4))
 
-        if old_count == 0 and new_count > 0:
-            return f"Added lines {new_start} to {new_start + new_count - 1} in the new version."
-        elif old_count > 0 and new_count == 0:
-            return f"Removed lines {old_start} to {old_start + old_count - 1} from the old version."
+        is_create = old_count == 0 and new_count > 0
+        is_delete = old_count > 0 and new_count == 0
+
+        info = ""
+        start_line = -1
+        end_line = -1
+        if is_create:
+            info = f"Added lines {new_start} to {new_start + new_count - 1} in the new version."
+            start_line = new_start
+            end_line = new_start + new_count - 1
+
+        elif is_delete:
+            info = f"Removed lines {old_start} to {old_start + old_count - 1} from the old version."
+            start_line = old_start
+            end_line = old_start + old_count - 1
         else:
-            return f"Changed lines {old_start} to {old_start + old_count - 1} in the old version to lines {new_start} to {new_start + new_count - 1} in the new version."
+            info = f"Changed lines {old_start} to {old_start + old_count - 1} in the old version to lines {new_start} to {new_start + new_count - 1} in the new version."
+            start_line = old_start
+            end_line = old_start + old_count - 1
 
-
-
+        return {
+            'info': info,
+            'start_line': start_line,
+            'end_line': end_line,
+            'is_create': is_create,
+            'is_delete': is_delete,
+        }
 
 
     def _extract_changes(self) -> Dict[str, List[Dict[str, List[str]]]]:
